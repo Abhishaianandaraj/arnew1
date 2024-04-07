@@ -30,7 +30,7 @@ async function init() {
   document.body.appendChild(button);
 
   const imgMarkerHiro = document.getElementById("imgMarkerHiro");
-  const imgMarkerHiroBitmap =  createImageBitmap(imgMarkerHiro);
+  const imgMarkerHiroBitmap = await createImageBitmap(imgMarkerHiro);
 
   const hiroMarkerGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
   hiroMarkerGeometry.translate(0, 0.1, 0);
@@ -54,14 +54,14 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate() {
+async function animate() {
   renderer.setAnimationLoop(render);
 }
 
-function render(timestamp, frame) {
+async function render(timestamp, frame) {
   if (frame) {
     const referenceSpace = renderer.xr.getReferenceSpace();
-    const hitTestResults = frame.getHitTestResults(referenceSpace);
+    const hitTestResults = await frame.getHitTestResults(referenceSpace);
 
     for (const result of hitTestResults) {
       const pose = result.getPose(referenceSpace);
@@ -75,5 +75,15 @@ function render(timestamp, frame) {
   renderer.render(scene, camera);
 }
 
-init();
-animate();
+async function checkCameraPermission() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true });
+    console.log('Camera permission granted');
+    init();
+    animate();
+  } catch (error) {
+    console.error('Camera permission denied:', error);
+  }
+}
+
+checkCameraPermission();
