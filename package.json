@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vite-plugin-resolve": "^2.5.1"
   },
   "dependencies": {
     "three": "^0.163.0"
