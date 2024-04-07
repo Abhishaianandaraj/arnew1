@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ARButton } from "three/examples/jsm/webxr/ARButton.js";
+import { XRWebGLLayer, XRSessionMode } from 'three/examples/jsm/webxr/XRWebGLBinding.js';
 
 let camera, scene, renderer, hiroMarkerMesh;
 
@@ -23,17 +23,20 @@ async function init() {
   const imgMarkerHiro = document.getElementById("imgMarkerHiro");
   const imgMarkerHiroBitmap = await createImageBitmap(imgMarkerHiro);
 
-  const button = await ARButton.createButton(renderer, {
-    trackedImages: [
-      {
-        image: imgMarkerHiroBitmap,
-        widthInMeters: 0.2,
-      },
-    ],
-    optionalFeatures: ["dom-overlay"],
-    domOverlay: {
-      root: document.body,
-    },
+  const button = document.createElement('button');
+  button.textContent = 'Start AR';
+  button.addEventListener('click', async () => {
+    try {
+      await renderer.xr.setReferenceSpaceType('local');
+      await renderer.xr.requestSession('immersive-ar', {
+        optionalFeatures: ['dom-overlay'],
+        domOverlay: { root: document.body }
+      });
+      renderer.setAnimationLoop(render);
+      button.style.display = 'none';
+    } catch (error) {
+      console.error('Failed to start AR session:', error);
+    }
   });
   document.body.appendChild(button);
 
@@ -72,4 +75,3 @@ window.addEventListener("resize", () => {
 });
 
 init();
-renderer.setAnimationLoop(render);
