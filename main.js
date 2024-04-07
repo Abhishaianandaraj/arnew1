@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 const img = document.getElementById('imgMarkerHiro');
 let imgBitmap = null;
 
@@ -136,19 +135,17 @@ function onXRFrame(t, frame) {
             gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
             const results = frame.getImageTrackingResults();
             for (const result of results) {
-                const imageIndex = result.index;
                 const pose1 = frame.getPose(result.imageSpace, xrRefSpace);
-                const pos = pose1.transform.position;
-                const quat = pose1.transform.orientation;
+                if (pose1) {
+                    const pos = pose1.transform.position;
+                    const quat = pose1.transform.orientation;
 
-                earthCube.position.copy(pos.toJSON());
-                earthCube.quaternion.copy(quat.toJSON());
-                const state = result.trackingState;
+                    earthCube.position.set(pos.x, pos.y, pos.z);
+                    earthCube.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
-                if (state === "tracked") {
-                    // HighlightImage(imageIndex, pose1);
-                } else if (state === "emulated") {
-                    // FadeImage(imageIndex, pose1);
+                    // Update the position and orientation elements
+                    positionElement.textContent = `Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
+                    orientationElement.textContent = `Orientation: x=${quat.x.toFixed(2)}, y=${quat.y.toFixed(2)}, z=${quat.z.toFixed(2)}, w=${quat.w.toFixed(2)}`;
                 }
             }
         }
@@ -166,6 +163,21 @@ function onWindowResize() {
 function render() {
     renderer.render(scene, camera);
 }
+
+// Create HTML elements to display the position and orientation
+const positionElement = document.createElement('div');
+positionElement.id = 'position';
+positionElement.style.position = 'absolute';
+positionElement.style.top = '10px';
+positionElement.style.left = '10px';
+document.body.appendChild(positionElement);
+
+const orientationElement = document.createElement('div');
+orientationElement.id = 'orientation';
+orientationElement.style.position = 'absolute';
+orientationElement.style.top = '30px';
+orientationElement.style.left = '10px';
+document.body.appendChild(orientationElement);
 
 const button = document.createElement('button');
 button.id = 'ArButton';
