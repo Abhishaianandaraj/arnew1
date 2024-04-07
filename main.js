@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 const img  = document.getElementById('imgMarkerHiro');
 // Ensure the image is loaded and ready for use
 var imgBitmap = null
