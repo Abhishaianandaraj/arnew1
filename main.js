@@ -1,77 +1,80 @@
 import * as THREE from 'three';
-import { XRWebGLLayer, XRSessionMode } from 'three/examples/jsm/webxr/XRWebGLBinding.js';
+import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-let camera, scene, renderer, hiroMarkerMesh;
+			let camera, scene, renderer;
+			let controller;
 
-async function init() {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+			init();
+			animate();
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.outputColorSpace = THREE.sRGBEncoding;
-  renderer.xr.enabled = true;
+			function init() {
 
-  const container = document.querySelector("#scene-container");
-  container.appendChild(renderer.domElement);
+				const container = document.createElement( 'div' );
+				document.body.appendChild( container );
 
-  const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-  ambient.position.set(0.5, 1, 0.25);
-  scene.add(ambient);
+				scene = new THREE.Scene();
 
-  const imgMarkerHiro = document.getElementById("imgMarkerHiro");
-  const imgMarkerHiroBitmap = await createImageBitmap(imgMarkerHiro);
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 
-  const button = document.createElement('button');
-  button.textContent = 'Start AR';
-  button.addEventListener('click', async () => {
-    try {
-      await renderer.xr.setReferenceSpaceType('local');
-      await renderer.xr.requestSession('immersive-ar', {
-        optionalFeatures: ['dom-overlay'],
-        domOverlay: { root: document.body }
-      });
-      renderer.setAnimationLoop(render);
-      button.style.display = 'none';
-    } catch (error) {
-      console.error('Failed to start AR session:', error);
-    }
-  });
-  document.body.appendChild(button);
+				const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 3 );
+				light.position.set( 0.5, 1, 0.25 );
+				scene.add( light );
 
-  const hiroMarkerGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-  hiroMarkerGeometry.translate(0, 0.1, 0);
-  const hiroMarkerMaterial = new THREE.MeshNormalMaterial({
-    transparent: true,
-    opacity: 0.5,
-    side: THREE.DoubleSide,
-  });
-  hiroMarkerMesh = new THREE.Mesh(hiroMarkerGeometry, hiroMarkerMaterial);
-  hiroMarkerMesh.name = "HiroMarkerCube";
-  hiroMarkerMesh.matrixAutoUpdate = false;
-  hiroMarkerMesh.visible = false;
-  scene.add(hiroMarkerMesh);
-}
+				//
 
-function render(timestamp, frame) {
-  if (frame) {
-    const results = frame.getHitTestResults();
-    for (const result of results) {
-      const pose = result.getPose(renderer.xr.getReferenceSpace());
-      if (pose) {
-        hiroMarkerMesh.visible = true;
-        hiroMarkerMesh.matrix.fromArray(pose.transform.matrix);
-      }
-    }
-  }
-  renderer.render(scene, camera);
-}
+				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.xr.enabled = true;
+				container.appendChild( renderer.domElement );
 
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+				//
 
-init();
+				document.body.appendChild( ARButton.createButton( renderer ) );
+
+				//
+
+				const geometry = new THREE.CylinderGeometry( 0, 0.05, 0.2, 32 ).rotateX( Math.PI / 2 );
+
+				function onSelect() {
+
+					const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+					const mesh = new THREE.Mesh( geometry, material );
+					mesh.position.set( 0, 0, - 0.3 ).applyMatrix4( controller.matrixWorld );
+					mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
+					scene.add( mesh );
+
+				}
+
+				controller = renderer.xr.getController( 0 );
+				controller.addEventListener( 'select', onSelect );
+				scene.add( controller );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function animate() {
+
+				renderer.setAnimationLoop( render );
+
+			}
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
