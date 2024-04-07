@@ -5,6 +5,7 @@ let imgBitmap = null;
 // Ensure the image is loaded and ready for use
 createImageBitmap(img).then(x => {
     imgBitmap = x;
+    console.log(imgBitmap);
 });
 
 // Standard webxr scene
