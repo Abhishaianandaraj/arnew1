@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-let camera, scene, renderer, controller, hiroMarkerMesh;
+let camera, scene, renderer, hiroMarkerMesh;
 
-function init() {
+async function init() {
   const container = document.createElement('div');
   document.body.appendChild(container);
 
@@ -20,15 +20,17 @@ function init() {
   renderer.xr.enabled = true;
   container.appendChild(renderer.domElement);
 
-  document.body.appendChild(ARButton.createButton(renderer, {
-    requiredFeatures: ['image-tracking'],
-    trackedImages: [
-      {
-        image: createImageBitmap(document.getElementById('imgMarkerHiro')),
-        widthInMeters: 0.2,
-      },
-    ],
-  }));
+  const button = await ARButton.createButton(renderer, {
+    requiredFeatures: ['hit-test'],
+    sessionInit: {
+      optionalFeatures: ['dom-overlay'],
+      domOverlay: { root: document.body },
+    },
+  });
+  document.body.appendChild(button);
+
+  const imgMarkerHiro = document.getElementById("imgMarkerHiro");
+  const imgMarkerHiroBitmap =  createImageBitmap(imgMarkerHiro);
 
   const hiroMarkerGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
   hiroMarkerGeometry.translate(0, 0.1, 0);
@@ -59,12 +61,13 @@ function animate() {
 function render(timestamp, frame) {
   if (frame) {
     const referenceSpace = renderer.xr.getReferenceSpace();
-    const results = frame.getUpdatedTrackableObjects(referenceSpace);
+    const hitTestResults = frame.getHitTestResults(referenceSpace);
 
-    for (const result of results) {
-      if (result.type === 'image') {
+    for (const result of hitTestResults) {
+      const pose = result.getPose(referenceSpace);
+      if (pose) {
         hiroMarkerMesh.visible = true;
-        hiroMarkerMesh.matrix.fromArray(result.transform.matrix);
+        hiroMarkerMesh.matrix.fromArray(pose.transform.matrix);
       }
     }
   }
