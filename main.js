@@ -5,12 +5,7 @@ let camera, scene, renderer, hiroMarkerMesh;
 
 async function init() {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    20
-  );
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -28,8 +23,7 @@ async function init() {
   const imgMarkerHiro = document.getElementById("imgMarkerHiro");
   const imgMarkerHiroBitmap = await createImageBitmap(imgMarkerHiro);
 
-  console.log(imgMarkerHiroBitmap);
-  const button = ARButton.createButton(renderer, {
+  const button = await ARButton.createButton(renderer, {
     trackedImages: [
       {
         image: imgMarkerHiroBitmap,
