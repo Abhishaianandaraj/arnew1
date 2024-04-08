@@ -89,6 +89,7 @@ function AR() {
         });
 
         const scores = session.getTrackedImageScores();
+        console.log(scores);
         let trackableImages = 0;
         for (let index = 0; index < scores.length; ++index) {
             if (scores[index] === 'untrackable') {
