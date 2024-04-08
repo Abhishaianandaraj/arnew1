@@ -125,7 +125,7 @@ function AR() {
             referenceSpaceType: 'local', // 'local-floor'
             sessionInit: options
         });
-        //navigator.xr.requestSession('immersive-ar', sessionInit).then(onSessionStarted);
+        navigator.xr.requestSession('immersive-ar', sessionInit).then(onSessionStarted);
     } else {
         currentSession.end();
     }
