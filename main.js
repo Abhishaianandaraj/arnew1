@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-const img = document.getElementById('imgMarkerHiro');
+const img = document.getElementById('EarthM');
 let imgBitmap = null;
 
 // Ensure the image is loaded and ready for use
