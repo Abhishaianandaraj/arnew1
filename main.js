@@ -43,8 +43,8 @@ import { ARButton } from 'three/addons/webxr/ARButton.js';
 					mesh.position.set( 0, 0, - 0.3 ).applyMatrix4( controller.matrixWorld );
 					mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
 					scene.add( mesh );
-          console.log(mesh.getWorldPosition);
-          console.log(mesh.getWorldQuaternion);
+          console.log(mesh.position);
+          console.log(mesh.quaternion);
 				}
 
 				controller = renderer.xr.getController( 0 );
