@@ -1,19 +1,15 @@
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-const img = document.getElementById('imgMarkerHiro');
 let imgBitmap = null;
-
-// Ensure the image is loaded and ready for use
-createImageBitmap(img).then(bitmap => {
-    imgBitmap = bitmap;
-    console.log(imgBitmap);
-});
-
 let camera, scene, renderer, xrRefSpace, gl;
+let earthCube, positionElement, orientationElement, button;
 
-function init() {
+async function init() {
     scene = new THREE.Scene();
+
+    const img = document.getElementById('imgMarkerHiro');
+    imgBitmap = await createImageBitmap(img);
 
     const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
@@ -23,7 +19,7 @@ function init() {
 
     const geometry1 = new THREE.BoxGeometry(0.1, 0.1, 0.1);
     const material1 = new THREE.MeshStandardMaterial({ color: 0xcc6600 });
-    const earthCube = new THREE.Mesh(geometry1, material1);
+    earthCube = new THREE.Mesh(geometry1, material1);
     scene.add(earthCube);
 
     const ambient = new THREE.AmbientLight(0x222222);
@@ -46,33 +42,34 @@ function init() {
     document.body.appendChild(renderer.domElement);
     renderer.xr.enabled = true;
 
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', onWindowResize);
+
+    positionElement = document.createElement('div');
+    positionElement.id = 'position';
+    positionElement.style.position = 'absolute';
+    positionElement.style.top = '10px';
+    positionElement.style.left = '10px';
+    document.body.appendChild(positionElement);
+
+    orientationElement = document.createElement('div');
+    orientationElement.id = 'orientation';
+    orientationElement.style.position = 'absolute';
+    orientationElement.style.top = '30px';
+    orientationElement.style.left = '10px';
+    document.body.appendChild(orientationElement);
+
+    button = document.createElement('button');
+    button.id = 'ArButton';
+    button.textContent = 'ENTER AR';
+    button.style.cssText += `position: absolute;top:80%;left:40%;width:20%;height:2rem;`;
+    document.body.appendChild(button);
+    button.addEventListener('click', () => {
+        console.log("Button Clicked");
+        AR();
+    });
 }
 
-function getXRSessionInit(mode, options) {
-    if (options && options.referenceSpaceType) {
-        renderer.xr.setReferenceSpaceType(options.referenceSpaceType);
-    }
-    const space = (options || {}).referenceSpaceType || 'local-floor';
-    const sessionInit = (options && options.sessionInit) || {};
-
-    // Nothing to do for default features.
-    if (space === 'viewer') return sessionInit;
-    if (space === 'local' && mode.startsWith('immersive')) return sessionInit;
-
-    // If the user already specified the space as an optional or required feature, don't do anything.
-    if (sessionInit.optionalFeatures && sessionInit.optionalFeatures.includes(space)) return sessionInit;
-    if (sessionInit.requiredFeatures && sessionInit.requiredFeatures.includes(space)) return sessionInit;
-
-    const newInit = Object.assign({}, sessionInit);
-    newInit.requiredFeatures = [space];
-    if (sessionInit.requiredFeatures) {
-        newInit.requiredFeatures = newInit.requiredFeatures.concat(sessionInit.requiredFeatures);
-    }
-    return newInit;
-}
-
-function AR() {
+async function AR() {
     console.log("session started");
     let currentSession = null;
 
@@ -90,14 +87,7 @@ function AR() {
 
         const scores = session.getTrackedImageScores();
         console.log(scores);
-        let trackableImages = 0;
-        for (let index = 0; index < scores.length; ++index) {
-            if (scores[index] === 'untrackable') {
-                MarkImageUntrackable(index);
-            } else {
-                ++trackableImages;
-            }
-        }
+        const trackableImages = scores.filter(score => score !== 'untrackable').length;
         if (trackableImages === 0) {
             console.log("No trackable images");
         }
@@ -126,7 +116,12 @@ function AR() {
             referenceSpaceType: 'local', // 'local-floor'
             sessionInit: options
         });
-        navigator.xr.requestSession('immersive-ar', sessionInit).then(onSessionStarted);
+        try {
+            currentSession = await navigator.xr.requestSession('immersive-ar', sessionInit);
+            onSessionStarted(currentSession);
+        } catch (error) {
+            console.error("Failed to start AR session:", error);
+        }
     } else {
         currentSession.end();
     }
@@ -156,24 +151,20 @@ function onXRFrame(t, frame) {
             gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
             const results = frame.getImageTrackingResults();
             for (const result of results) {
-                const imageIndex = result.index;
                 const pose1 = frame.getPose(result.imageSpace, xrRefSpace);
                 if (pose1) {
                     const state = result.trackingState;
                     if (state === 'tracked') {
-                        HighlightImage(imageIndex, pose);
-                    } else if (state === 'emulated') {
-                        FadeImage(imageIndex, pose);
+                        // Update earthCube position and orientation
+                        const pos = pose1.transform.position;
+                        const quat = pose1.transform.orientation;
+                        earthCube.position.set(pos.x, pos.y, pos.z);
+                        earthCube.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+
+                        // Update the position and orientation elements
+                        positionElement.textContent = `Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
+                        orientationElement.textContent = `Orientation: x=${quat.x.toFixed(2)}, y=${quat.y.toFixed(2)}, z=${quat.z.toFixed(2)}, w=${quat.w.toFixed(2)}`;
                     }
-                    const pos = pose1.transform.position;
-                    const quat = pose1.transform.orientation;
-
-                    earthCube.position.set(pos.x, pos.y, pos.z);
-                    earthCube.quaternion.set(quat.x, quat.y, quat.z, quat.w);
-
-                    // Update the position and orientation elements
-                    positionElement.textContent = `Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
-                    orientationElement.textContent = `Orientation: x=${quat.x.toFixed(2)}, y=${quat.y.toFixed(2)}, z=${quat.z.toFixed(2)}, w=${quat.w.toFixed(2)}`;
                 }
             }
         }
@@ -187,29 +178,3 @@ function onWindowResize() {
 }
 
 init();
-
-// Create HTML elements to display the position and orientation
-const positionElement = document.createElement('div');
-positionElement.id = 'position';
-positionElement.style.position = 'absolute';
-positionElement.style.top = '10px';
-positionElement.style.left = '10px';
-document.body.appendChild(positionElement);
-
-const orientationElement = document.createElement('div');
-orientationElement.id = 'orientation';
-orientationElement.style.position = 'absolute';
-orientationElement.style.top = '30px';
-orientationElement.style.left = '10px';
-document.body.appendChild(orientationElement);
-
-const button = document.createElement('button');
-button.id = 'ArButton';
-button.textContent = 'ENTER AR';
-button.style.cssText += `position: absolute;top:80%;left:40%;width:20%;height:2rem;`;
-
-document.body.appendChild(button);
-document.getElementById('ArButton').addEventListener('click', () => {
-    console.log("Button Clicked");
-    AR();
-});
