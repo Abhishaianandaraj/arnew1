@@ -188,4 +188,6 @@ button.textContent = 'ENTER AR';
 button.style.cssText += `position: absolute;top:80%;left:40%;width:20%;height:2rem;`;
 
 document.body.appendChild(button);
-document.getElementById('ArButton').addEventListener('click', x => AR());
+document.getElementById('ArButton').addEventListener('click', (x) => {
+  console.log("Button Clicked");
+  AR();});
