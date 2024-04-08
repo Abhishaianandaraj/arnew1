@@ -1,194 +1,81 @@
 import * as THREE from 'three';
-const img = document.getElementById('HiroM');
-let imgBitmap = null;
+import { ARButton } from 'three/addons/webxr/ARButton.js';
 
-// Ensure the image is loaded and ready for use
-createImageBitmap(img).then(x => {
-    imgBitmap = x;
-    console.log(imgBitmap);
-});
+			let camera, scene, renderer;
+			let controller;
 
-// Standard webxr scene
-let camera, scene, renderer, xrRefSpace, gl;
-scene = new THREE.Scene();
+			init();
+			animate();
 
-const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-const desktopCube = new THREE.Mesh(geometry, material);
-scene.add(desktopCube);
-desktopCube.position.z -= 0.5;
+			function init() {
 
-const geometry1 = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-const material1 = new THREE.MeshStandardMaterial({ color: 0xcc6600 });
-const earthCube = new THREE.Mesh(geometry1, material1);
-scene.add(earthCube);
+				const container = document.createElement( 'div' );
+				document.body.appendChild( container );
 
-const ambient = new THREE.AmbientLight(0x222222);
-scene.add(ambient);
-const directionalLight = new THREE.DirectionalLight(0xdddddd, 1.5);
-directionalLight.position.set(0.9, 1, 0.6).normalize();
-scene.add(directionalLight);
-const directionalLight2 = new THREE.DirectionalLight(0xdddddd, 1);
-directionalLight2.position.set(-0.9, -1, -0.4).normalize();
-scene.add(directionalLight2);
+				scene = new THREE.Scene();
 
-camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 20000);
-renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-camera.aspect = window.innerWidth / window.innerHeight;
-renderer.setSize(window.innerWidth, window.innerHeight);
-camera.updateProjectionMatrix();
-document.body.appendChild(renderer.domElement);
-renderer.xr.enabled = true;
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 
-function init() {
-    window.addEventListener('resize', onWindowResize, false);
-}
+				const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 3 );
+				light.position.set( 0.5, 1, 0.25 );
+				scene.add( light );
 
-function getXRSessionInit(mode, options) {
-    if (options && options.referenceSpaceType) {
-        renderer.xr.setReferenceSpaceType(options.referenceSpaceType);
-    }
-    const space = (options || {}).referenceSpaceType || 'local-floor';
-    const sessionInit = (options && options.sessionInit) || {};
+				//
 
-    // Nothing to do for default features.
-    if (space === 'viewer') return sessionInit;
-    if (space === 'local' && mode.startsWith('immersive')) return sessionInit;
+				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.xr.enabled = true;
+				container.appendChild( renderer.domElement );
 
-    // If the user already specified the space as an optional or required feature, don't do anything.
-    if (sessionInit.optionalFeatures && sessionInit.optionalFeatures.includes(space)) return sessionInit;
-    if (sessionInit.requiredFeatures && sessionInit.requiredFeatures.includes(space)) return sessionInit;
+				//
 
-    const newInit = Object.assign({}, sessionInit);
-    newInit.requiredFeatures = [space];
-    if (sessionInit.requiredFeatures) {
-        newInit.requiredFeatures = newInit.requiredFeatures.concat(sessionInit.requiredFeatures);
-    }
-    return newInit;
-}
+				document.body.appendChild( ARButton.createButton( renderer ) );
 
-function AR() {
-   console.log("session started");
-    let currentSession = null;
+				//
 
-    function onSessionStarted(session) {
-        session.addEventListener('end', onSessionEnded);
-        renderer.xr.setSession(session);
-        gl = renderer.getContext();
-        button.style.display = 'none';
-        button.textContent = 'EXIT AR';
-        currentSession = session;
-        session.requestReferenceSpace('local').then(refSpace => {
-            xrRefSpace = refSpace;
-            console.log(refSpace);
-            session.requestAnimationFrame(onXRFrame);
-        });
-    }
+				const geometry = new THREE.CylinderGeometry( 0, 0.05, 0.2, 32 ).rotateX( Math.PI / 2 );
 
-    function onSessionEnded() {
-        currentSession.removeEventListener('end', onSessionEnded);
-        renderer.xr.setSession(null);
-        button.textContent = 'ENTER AR';
-        currentSession = null;
-    }
+				function onSelect() {
 
-    if (currentSession === null) {
-        const options = {
-            requiredFeatures: ['dom-overlay', 'image-tracking'],
-            trackedImages: [
-                {
-                    image: imgBitmap,
-                    widthInMeters: 0.2
-                }
-            ],
-            domOverlay: { root: document.body }
-        };
-        const sessionInit = getXRSessionInit('immersive-ar', {
-            mode: 'immersive-ar',
-            referenceSpaceType: 'local', // 'local-floor'
-            sessionInit: options
-        });
-        navigator.xr.requestSession('immersive-ar', sessionInit).then(onSessionStarted);
-    } else {
-        currentSession.end();
-    }
+					const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+					const mesh = new THREE.Mesh( geometry, material );
+					mesh.position.set( 0, 0, - 0.3 ).applyMatrix4( controller.matrixWorld );
+					mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
+					scene.add( mesh );
+          console.log(mesh.getWorldPosition);
+          console.log(mesh.getWorldQuaternion);
+				}
 
-    renderer.xr.addEventListener('sessionstart', ev => {
-        console.log('sessionstart', ev);
-        document.body.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        renderer.domElement.style.display = 'none';
-    });
+				controller = renderer.xr.getController( 0 );
+				controller.addEventListener( 'select', onSelect );
+				scene.add( controller );
 
-    renderer.xr.addEventListener('sessionend', ev => {
-        console.log('sessionend', ev);
-        document.body.style.backgroundColor = '';
-        renderer.domElement.style.display = '';
-    });
-}
+				//
 
-function onXRFrame(t, frame) {
-    const session = frame.session;
-    session.requestAnimationFrame(onXRFrame);
-    const baseLayer = session.renderState.baseLayer;
-    const pose = frame.getViewerPose(xrRefSpace);
+				window.addEventListener( 'resize', onWindowResize );
 
-    if (pose) {
-        for (const view of pose.views) {
-            const viewport = baseLayer.getViewport(view);
-            gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-            const results = frame.getImageTrackingResults();
-            for (const result of results) {
-                const pose1 = frame.getPose(result.imageSpace, xrRefSpace);
-                if (pose1) {
-                    const pos = pose1.transform.position;
-                    const quat = pose1.transform.orientation;
+			}
 
-                    earthCube.position.set(pos.x, pos.y, pos.z);
-                    earthCube.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+			function onWindowResize() {
 
-                    // Update the position and orientation elements
-                    positionElement.textContent = `Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
-                    orientationElement.textContent = `Orientation: x=${quat.x.toFixed(2)}, y=${quat.y.toFixed(2)}, z=${quat.z.toFixed(2)}, w=${quat.w.toFixed(2)}`;
-                }
-            }
-        }
-    }
-}
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
 
-init();
+				renderer.setSize( window.innerWidth, window.innerHeight );
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+			}
 
-function render() {
-    renderer.render(scene, camera);
-}
+			//
 
-// Create HTML elements to display the position and orientation
-const positionElement = document.createElement('div');
-positionElement.id = 'position';
-positionElement.style.position = 'absolute';
-positionElement.style.top = '10px';
-positionElement.style.left = '10px';
-document.body.appendChild(positionElement);
+			function animate() {
 
-const orientationElement = document.createElement('div');
-orientationElement.id = 'orientation';
-orientationElement.style.position = 'absolute';
-orientationElement.style.top = '30px';
-orientationElement.style.left = '10px';
-document.body.appendChild(orientationElement);
+				renderer.setAnimationLoop( render );
 
-const button = document.createElement('button');
-button.id = 'ArButton';
-button.textContent = 'ENTER AR';
-button.style.cssText += `position: absolute;top:80%;left:40%;width:20%;height:2rem;`;
+			}
 
-document.body.appendChild(button);
-document.getElementById('ArButton').addEventListener('click', (x) => {
-  console.log("Button Clicked");
-  AR();});
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
