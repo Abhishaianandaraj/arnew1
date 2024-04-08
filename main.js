@@ -69,6 +69,7 @@ function getXRSessionInit(mode, options) {
 }
 
 function AR() {
+   console.log("session started");
     let currentSession = null;
 
     function onSessionStarted(session) {
