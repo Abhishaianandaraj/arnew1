@@ -149,7 +149,7 @@ function onXRFrame(t, frame) {
     session.requestAnimationFrame(onXRFrame);
     const baseLayer = session.renderState.baseLayer;
     const pose = frame.getViewerPose(xrRefSpace);
-
+    console.log(pose);
     if (pose) {
         for (const view of pose.views) {
             const viewport = baseLayer.getViewport(view);
