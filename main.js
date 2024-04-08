@@ -81,6 +81,7 @@ function AR() {
         currentSession = session;
         session.requestReferenceSpace('local').then(refSpace => {
             xrRefSpace = refSpace;
+            console.log(refSpace);
             session.requestAnimationFrame(onXRFrame);
         });
     }
