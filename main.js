@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-const img = document.getElementById('EarthM');
+const img = document.getElementById('HiroM');
 let imgBitmap = null;
 
 // Ensure the image is loaded and ready for use
