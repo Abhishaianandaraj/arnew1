@@ -32,7 +32,7 @@ async function init() {
       requiredFeatures: ['image-tracking'],
       trackedImages: [
         {
-          image: imgBitmap,
+          image: imgMarkerHiroBitmap,
           widthInMeters: 0.2
         }
       ],
