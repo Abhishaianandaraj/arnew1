@@ -98,6 +98,7 @@ function render( timestamp, frame ) {
 			const imageIndex = result.index;
       console.log(result);
 			// Get the pose of the image relative to a reference space.
+      const referenceSpace = renderer.xr.getReferenceSpace();
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
 
 			const state = result.trackingState;
