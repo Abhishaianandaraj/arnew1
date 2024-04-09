@@ -18,6 +18,17 @@ async function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.xr.enabled = true;
 
+  const material = new THREE.MeshNormalMaterial({
+    transparent: true,
+    opacity: 0.5,
+    side: THREE.DoubleSide
+  });
+
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
+  mesh.visible = false;
+  scene.add(mesh);
+
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
   light.position.set(0.5, 1, 0.25);
   scene.add(light);
