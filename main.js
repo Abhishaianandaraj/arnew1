@@ -109,8 +109,9 @@ function render( timestamp, frame ) {
         console.log("Image target has been found")
         mesh.visible = true;
         // update the cone mesh when the image target is found
+        
         mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(pose);
+        console.log(mesh.position);
       } else if (state == "emulated") {
         mesh.visible = false;
         console.log("Image target no longer seen")
