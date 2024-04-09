@@ -24,7 +24,7 @@ async function init() {
     side: THREE.DoubleSide
   });
 
-  mesh = new THREE.Mesh(geometry, material);
+  const mesh = new THREE.Mesh(geometry, material);
   mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
   mesh.visible = false;
   scene.add(mesh);
@@ -112,6 +112,7 @@ function render(timestamp, frame) {
       const state = result.trackingState;
       console.log(state);
       if (state == "tracked") {
+        console.log(mesh);
         console.log("Image target has been found")
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
