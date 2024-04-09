@@ -61,7 +61,7 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
-function addButton() {
+function addButton(frame) {
   const newButton = document.createElement('button');
   newButton.textContent = 'New Button';
   newButton.style.position = 'absolute';
@@ -70,9 +70,10 @@ function addButton() {
   document.body.appendChild(newButton);
 
   newButton.addEventListener('click', () => {
-    logPose();
+    logPose(frame);
   });
 }
+
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -107,9 +108,12 @@ function render(timestamp, frame) {
   renderer.render(scene, camera);
 }
 
-function logPose() {
+function logPose(frame) {
   const referenceSpace = renderer.xr.getReferenceSpace();
-  const pose = frame.getPose(result.imageSpace, referenceSpace);
-  console.log('Image Pose:', pose);
+  const results = frame.getImageTrackingResults();
+  for (const result of results) {
+    const pose = frame.getPose(result.imageSpace, referenceSpace);
+    console.log('Image Pose:', pose);
+  }
   console.log('Camera Pose:', camera.matrixWorld.elements);
 }
