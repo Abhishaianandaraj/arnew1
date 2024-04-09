@@ -87,18 +87,20 @@ function animate() {
 }
 
 function render( timestamp, frame ) {
-  console.log(viewerPose);
+  
 	if ( frame ) {
 
 		const results = frame.getImageTrackingResults();
-		
+		const referenceSpace = renderer.xr.getReferenceSpace();
+    const viewerPose = frame.getViewerPose(referenceSpace);
+     console.log(viewerPose);
 		for ( const result of results ) {
 		
 			// The result's index is the image's position in the trackedImages array specified at session creation
 			const imageIndex = result.index;
       //console.log(result);
 			// Get the pose of the image relative to a reference space.
-      const referenceSpace = renderer.xr.getReferenceSpace();
+      
       //console.log(referenceSpace);
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
     
@@ -106,7 +108,7 @@ function render( timestamp, frame ) {
       //console.log(referenceSpace);
 			const state = result.trackingState;
       console.log(state);
-      const viewerPose = frame.getViewerPose(referenceSpace);
+      
       if (state == "tracked") {
         console.log("Image target has been found")
         mesh.visible = true;
