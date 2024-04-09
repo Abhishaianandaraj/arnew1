@@ -46,9 +46,9 @@ async function init() {
   mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
   mesh.visible = false;
   scene.add(mesh);
-
+  
   // setup the image target
-  const img = document.getElementById('img');
+  const img = document.getElementById('imgMarkerHiro');
   const imgBitmap = await createImageBitmap(img);
   console.log(imgBitmap);
 
@@ -80,7 +80,11 @@ function onWindowResize() {
 }
 
 function animate() {
-  renderer.setAnimationLoop(render);
+  if(renderer){
+  renderer.setAnimationLoop(render);}
+  else{
+    console.log("no renderer");
+  }
 }
 
 function render(timestamp, frame) {
