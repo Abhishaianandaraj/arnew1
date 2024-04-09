@@ -86,33 +86,38 @@ function animate() {
   }
 }
 
-function render(timestamp, frame) {
-  if (frame) {
-    const results = frame.getHitTestResults(); //checking if there are any images we track
+function render( timestamp, frame ) {
 
-    //if we have more than one image the results are an array 
-    for (const result of results) {
-      // The result's index is the image's position in the trackedImages array specified at session creation
-      const imageIndex = result.index;
+	if ( frame ) {
 
-      // Get the pose of the image relative to a reference space.
-      const referenceSpace = renderer.xr.getReferenceSpace();
-      const pose = frame.getPose(result.imageSpace, referenceSpace);
+		const results = frame.getImageTrackingResults();
+		
+		for ( const result of results ) {
+		
+			// The result's index is the image's position in the trackedImages array specified at session creation
+			const imageIndex = result.index;
 
-      //checking the state of the tracking
-      const state = result.trackingState;
-      console.log(state);
+			// Get the pose of the image relative to a reference space.
+			const pose = frame.getPose( result.imageSpace, referenceSpace );
 
-      if (state == "tracked") {
-        console.log("Image target has been found")
-        mesh.visible = true;
-        // update the cone mesh when the image target is found
-        mesh.matrix.fromArray(pose.transform.matrix);
-      } else if (state == "emulated") {
-        mesh.visible = false;
-        console.log("Image target no longer seen")
-      }
-    }
-  }
-  renderer.render(scene, camera);
+			const state = result.trackingState;
+
+			if ( state == "tracked" ) {
+			
+				HighlightImage( imageIndex, pose );
+				
+			} else if ( state == "emulated" ) {
+			
+				FadeImage( imageIndex, pose );
+				
+			}
+			
+		}
+
+	}
+
+	renderer.render( scene, camera );
+
 }
+
+  
