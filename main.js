@@ -96,7 +96,7 @@ function render( timestamp, frame ) {
 		
 			// The result's index is the image's position in the trackedImages array specified at session creation
 			const imageIndex = result.index;
-
+      console.log(result);
 			// Get the pose of the image relative to a reference space.
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
 
