@@ -54,7 +54,27 @@ async function init() {
   });
   document.body.appendChild(button);
 
+  button.addEventListener('click', addButton); // Add event listener to ARButton
+
   window.addEventListener("resize", onWindowResize, false);
+}
+
+function addButton() {
+  // Create a new button
+  const newButton = document.createElement('button');
+  newButton.textContent = 'New Button';
+  newButton.style.position = 'absolute';
+  newButton.style.top = '20px';
+  newButton.style.left = '20px';
+  document.body.appendChild(newButton);
+
+  // Add event listener to newly added button
+  newButton.addEventListener('click', logPositions);
+}
+
+function logPositions() {
+  console.log("Image position:", mesh.position);
+  console.log("Camera position:", camera.position);
 }
 
 function onWindowResize() {
@@ -77,19 +97,14 @@ function render(timestamp, frame) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     const viewerPose = frame.getViewerPose(referenceSpace);
-    console.log(viewerPose);
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
-      console.log(pose);
       const state = result.trackingState;
-      console.log(state);
       if (state == "tracked") {
-        console.log("Image target has been found");
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
       } else if (state == "emulated") {
         mesh.visible = false;
-        console.log("Image target no longer seen");
       }
     }
   }
