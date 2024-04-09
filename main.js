@@ -1,180 +1,114 @@
-import * as THREE from 'three';
+import './style.css'
+import * as THREE from 'three'
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-let imgBitmap = null;
-let camera, scene, renderer, xrRefSpace, gl;
-let earthCube, positionElement, orientationElement, button;
+let camera, canvas, scene, renderer;
+let mesh;
+
+init();
+animate();
 
 async function init() {
-    scene = new THREE.Scene();
+  canvas = document.querySelector('canvas.webgl')
 
-    const img = document.getElementById('imgMarkerHiro');
-    imgBitmap = await createImageBitmap(img);
+  scene = new THREE.Scene();
 
-    const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const desktopCube = new THREE.Mesh(geometry, material);
-    scene.add(desktopCube);
-    desktopCube.position.z -= 0.5;
+  camera = new THREE.PerspectiveCamera(70,
+    window.innerWidth / window.innerHeight,
+    0.01,
+    40
+  );
 
-    const geometry1 = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-    const material1 = new THREE.MeshStandardMaterial({ color: 0xcc6600 });
-    earthCube = new THREE.Mesh(geometry1, material1);
-    scene.add(earthCube);
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.xr.enabled = true;
 
-    const ambient = new THREE.AmbientLight(0x222222);
-    scene.add(ambient);
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  light.position.set(0.5, 1, 0.25);
+  scene.add(light);
 
-    const directionalLight = new THREE.DirectionalLight(0xdddddd, 1.5);
-    directionalLight.position.set(0.9, 1, 0.6).normalize();
-    scene.add(directionalLight);
+  // setup a cone mesh to put on top of the image target when it is seen
+  const radius = 0.2;
+  const height = 0.3;
+  const geometry = new THREE.ConeGeometry(radius, height, 32);
+  //by defualt the image will be rendered in the middle, so we need to push half of the height up to be exactly on top of the img
+  geometry.translate(0, height / 2, 0);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xdddddd, 1);
-    directionalLight2.position.set(-0.9, -1, -0.4).normalize();
-    scene.add(directionalLight2);
+  const material = new THREE.MeshNormalMaterial({
+    transparent: true,
+    opacity: 0.5,
+    side: THREE.DoubleSide
+  });
 
-    camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 20000);
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.updateProjectionMatrix();
-    document.body.appendChild(renderer.domElement);
-    renderer.xr.enabled = true;
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
+  mesh.visible = false;
+  scene.add(mesh);
 
-    window.addEventListener('resize', onWindowResize);
+  // setup the image target
+  const img = document.getElementById('imgMarkerHiro');
+  const imgBitmap = await createImageBitmap(img);
+  console.log(imgBitmap);
 
-    positionElement = document.createElement('div');
-    positionElement.id = 'position';
-    positionElement.style.position = 'absolute';
-    positionElement.style.top = '10px';
-    positionElement.style.left = '10px';
-    document.body.appendChild(positionElement);
-
-    orientationElement = document.createElement('div');
-    orientationElement.id = 'orientation';
-    orientationElement.style.position = 'absolute';
-    orientationElement.style.top = '30px';
-    orientationElement.style.left = '10px';
-    document.body.appendChild(orientationElement);
-
-    button = document.createElement('button');
-    button.id = 'ArButton';
-    button.textContent = 'ENTER AR';
-    button.style.cssText += `position: absolute;top:80%;left:40%;width:20%;height:2rem;`;
-    document.body.appendChild(button);
-    button.addEventListener('click', () => {
-        console.log("Button Clicked");
-        AR();
-    });
-}
-
-async function AR() {
-    console.log("session started");
-    let currentSession = null;
-
-    function onSessionStarted(session) {
-        session.addEventListener('end', onSessionEnded);
-        renderer.xr.setSession(session);
-        gl = renderer.getContext();
-        button.style.display = 'none';
-        button.textContent = 'EXIT AR';
-        currentSession = session;
-        session.requestReferenceSpace('local').then(refSpace => {
-            xrRefSpace = refSpace;
-            session.requestAnimationFrame(onXRFrame);
-        });
-
-        const scores = session.getTrackedImageScores();
-        console.log(scores);
-        const trackableImages = scores.filter(score => score !== 'untrackable').length;
-        if (trackableImages === 0) {
-            console.log("No trackable images");
-        }
+  //more on image-tracking feature: https://github.com/immersive-web/marker-tracking/blob/main/explainer.md
+  const button = ARButton.createButton(renderer, {
+    requiredFeatures: ["image-tracking"], // notice a new required feature
+    trackedImages: [
+      {
+        image: imgBitmap, // tell webxr this is the image target we want to track
+        widthInMeters: 0.7 // in meters what the size of the PRINTED image in the real world
+      }
+    ],
+    //this is for the mobile debug
+    optionalFeatures: ["dom-overlay", "dom-overlay-for-handheld-ar"],
+    domOverlay: {
+      root: document.body
     }
+  });
+  document.body.appendChild(button);
 
-    function onSessionEnded() {
-        currentSession.removeEventListener('end', onSessionEnded);
-        renderer.xr.setSession(null);
-        button.textContent = 'ENTER AR';
-        currentSession = null;
-    }
-
-    if (currentSession === null) {
-        const options = {
-            requiredFeatures: ['dom-overlay', 'image-tracking'],
-            trackedImages: [
-                {
-                    image: imgBitmap,
-                    widthInMeters: 0.2
-                }
-            ],
-            domOverlay: { root: document.body }
-        };
-        const sessionInit = getXRSessionInit('immersive-ar', {
-            mode: 'immersive-ar',
-            referenceSpaceType: 'local', // 'local-floor'
-            sessionInit: options
-        });
-        try {
-            currentSession = await navigator.xr.requestSession('immersive-ar', sessionInit);
-            onSessionStarted(currentSession);
-        } catch (error) {
-            console.error("Failed to start AR session:", error);
-        }
-    } else {
-        currentSession.end();
-    }
-
-    renderer.xr.addEventListener('sessionstart', ev => {
-        console.log('sessionstart', ev);
-        document.body.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        renderer.domElement.style.display = 'none';
-    });
-
-    renderer.xr.addEventListener('sessionend', ev => {
-        console.log('sessionend', ev);
-        document.body.style.backgroundColor = '';
-        renderer.domElement.style.display = '';
-    });
-}
-
-function onXRFrame(t, frame) {
-    const session = frame.session;
-    session.requestAnimationFrame(onXRFrame);
-    const baseLayer = session.renderState.baseLayer;
-    const pose = frame.getViewerPose(xrRefSpace);
-    console.log(pose);
-    if (pose) {
-        for (const view of pose.views) {
-            const viewport = baseLayer.getViewport(view);
-            gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
-            const results = frame.getImageTrackingResults();
-            for (const result of results) {
-                const pose1 = frame.getPose(result.imageSpace, xrRefSpace);
-                if (pose1) {
-                    const state = result.trackingState;
-                    if (state === 'tracked') {
-                        // Update earthCube position and orientation
-                        const pos = pose1.transform.position;
-                        const quat = pose1.transform.orientation;
-                        earthCube.position.set(pos.x, pos.y, pos.z);
-                        earthCube.quaternion.set(quat.x, quat.y, quat.z, quat.w);
-
-                        // Update the position and orientation elements
-                        positionElement.textContent = `Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
-                        orientationElement.textContent = `Orientation: x=${quat.x.toFixed(2)}, y=${quat.y.toFixed(2)}, z=${quat.z.toFixed(2)}, w=${quat.w.toFixed(2)}`;
-                    }
-                }
-            }
-        }
-    }
+  window.addEventListener("resize", onWindowResize, false);
 }
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 }
 
-init();
+function animate() {
+  renderer.setAnimationLoop(render);
+}
+
+function render(timestamp, frame) {
+  if (frame) {
+    const results = frame.getImageTrackingResults(); //checking if there are any images we track
+
+    //if we have more than one image the results are an array 
+    for (const result of results) {
+      // The result's index is the image's position in the trackedImages array specified at session creation
+      const imageIndex = result.index;
+
+      // Get the pose of the image relative to a reference space.
+      const referenceSpace = renderer.xr.getReferenceSpace();
+      const pose = frame.getPose(result.imageSpace, referenceSpace);
+
+      //checking the state of the tracking
+      const state = result.trackingState;
+      console.log(state);
+
+      if (state == "tracked") {
+        console.log("Image target has been found")
+        mesh.visible = true;
+        // update the cone mesh when the image target is found
+        mesh.matrix.fromArray(pose.transform.matrix);
+      } else if (state == "emulated") {
+        mesh.visible = false;
+        console.log("Image target no longer seen")
+      }
+    }
+  }
+  renderer.render(scene, camera);
+}
