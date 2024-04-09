@@ -55,7 +55,7 @@ async function init() {
   document.body.appendChild(button);
 
   button.addEventListener('click', () => {
-    addButton();
+    addButton(frame);
   });
 
   window.addEventListener("resize", onWindowResize, false);
