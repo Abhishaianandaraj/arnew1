@@ -2,19 +2,16 @@ import './style.css';
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-
 let camera, canvas, scene, renderer;
-let mesh;
+let mesh, mesh1;
 
 init();
 animate();
 
 async function init() {
-
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20
-  );
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -25,39 +22,18 @@ async function init() {
   light.position.set(0.5, 1, 0.25);
   scene.add(light);
 
-  // setup a cone mesh to put on top of the image target when it is seen
-  const radius = 0.2;
-  const height = 0.3;
-  const geometry = new THREE.ConeGeometry(radius, height, 32);
-  //by default the image will be rendered in the middle, so we need to push half of the height up to be exactly on top of the img
-  geometry.translate(0, height / 2, 0);
-
-  const material = new THREE.MeshNormalMaterial({
-    transparent: true,
-    opacity: 0.5,
-    side: THREE.DoubleSide
-  });
-
-  mesh = new THREE.Mesh(geometry, material);
-  mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
-  mesh.visible = false;
-  scene.add(mesh);
-  
-  // setup the image target
   const img = document.getElementById('imgMarkerHiro');
   const imgBitmap = await createImageBitmap(img);
   console.log(imgBitmap);
 
-  //more on image-tracking feature: https://github.com/immersive-web/marker-tracking/blob/main/explainer.md
   const button = ARButton.createButton(renderer, {
-    requiredFeatures: ["image-tracking"], // notice a new required feature
+    requiredFeatures: ["image-tracking"],
     trackedImages: [
       {
-        image: imgBitmap, // tell WebXR this is the image target we want to track
-        widthInMeters: 0.7 // in meters what the size of the PRINTED image in the real world
+        image: imgBitmap,
+        widthInMeters: 0.7
       }
     ],
-    //this is for the mobile debug
     optionalFeatures: ["dom-overlay", "dom-overlay-for-handheld-ar"],
     domOverlay: {
       root: document.body
@@ -76,6 +52,25 @@ function addButton() {
   newButton.style.top = '20px';
   newButton.style.left = '20px';
   document.body.appendChild(newButton);
+
+  newButton.addEventListener('click', () => {
+    captureMarkerPosition();
+  });
+}
+
+function captureMarkerPosition() {
+  if (mesh) {
+    const markerPosition = mesh.position.clone(); // Capture the position of the marker
+    addBoxAtMarkerPosition(markerPosition); // Add a box mesh at the captured position
+  }
+}
+
+function addBoxAtMarkerPosition(position) {
+  const boxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+  const boxMaterial = new THREE.MeshNormalMaterial();
+  const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+  boxMesh.position.copy(position); // Set the position of the box mesh to the captured marker position
+  scene.add(boxMesh);
 }
 
 function onWindowResize() {
@@ -86,54 +81,34 @@ function onWindowResize() {
 }
 
 function animate() {
-  if(renderer){
-  renderer.setAnimationLoop(render);}
-  else{
+  if (renderer) {
+    renderer.setAnimationLoop(render);
+  } else {
     console.log("no renderer");
   }
 }
 
-function render( timestamp, frame ) {
-  
-	if ( frame ) {
-
-		const results = frame.getImageTrackingResults();
-		const referenceSpace = renderer.xr.getReferenceSpace();
+function render(timestamp, frame) {
+  if (frame) {
+    const results = frame.getImageTrackingResults();
+    const referenceSpace = renderer.xr.getReferenceSpace();
     const viewerPose = frame.getViewerPose(referenceSpace);
-     console.log(viewerPose);
-		for ( const result of results ) {
-		
-			// The result's index is the image's position in the trackedImages array specified at session creation
-			const imageIndex = result.index;
-      //console.log(result);
-			// Get the pose of the image relative to a reference space.
-      
-      //console.log(referenceSpace);
-			const pose = frame.getPose( result.imageSpace, referenceSpace );
-    
+    console.log(viewerPose);
+    for (const result of results) {
+      const imageIndex = result.index;
+      const pose = frame.getPose(result.imageSpace, referenceSpace);
       console.log(pose);
-      //console.log(referenceSpace);
-			const state = result.trackingState;
+      const state = result.trackingState;
       console.log(state);
-      
       if (state == "tracked") {
         console.log("Image target has been found")
         mesh.visible = true;
-        // update the cone mesh when the image target is found
-        
         mesh.matrix.fromArray(pose.transform.matrix);
-       // console.log(mesh.position);
       } else if (state == "emulated") {
         mesh.visible = false;
         console.log("Image target no longer seen")
       }
-			
-		}
-
-	}
-
-	renderer.render( scene, camera );
-
+    }
+  }
+  renderer.render(scene, camera);
 }
-
-  
