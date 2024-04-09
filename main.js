@@ -96,24 +96,24 @@ function render( timestamp, frame ) {
 		
 			// The result's index is the image's position in the trackedImages array specified at session creation
 			const imageIndex = result.index;
-      console.log(result);
+      //console.log(result);
 			// Get the pose of the image relative to a reference space.
       const referenceSpace = renderer.xr.getReferenceSpace();
-      console.log(referenceSpace);
+      //console.log(referenceSpace);
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
     
-      console.log(pose);
-      console.log(referenceSpace);
+      //console.log(pose);
+      //console.log(referenceSpace);
 			const state = result.trackingState;
       console.log(state);
-
+      const viewerPose = frame.getViewerPose(referenceSpace);
       if (state == "tracked") {
         console.log("Image target has been found")
         mesh.visible = true;
         // update the cone mesh when the image target is found
-        
+        console.log(viewerPose)
         mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(mesh.position);
+       // console.log(mesh.position);
       } else if (state == "emulated") {
         mesh.visible = false;
         console.log("Image target no longer seen")
