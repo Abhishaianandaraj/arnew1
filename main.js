@@ -4,6 +4,7 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
 let camera, scene, renderer;
 let mesh;
+let lastFrame;
 
 init();
 animate();
@@ -55,7 +56,7 @@ async function init() {
   document.body.appendChild(button);
 
   button.addEventListener('click', () => {
-    addButton(frame);
+    addButton(lastFrame); // Pass the lastFrame to addButton
   });
 
   window.addEventListener("resize", onWindowResize, false);
@@ -92,6 +93,7 @@ function animate() {
 
 function render(timestamp, frame) {
   if (frame) {
+    lastFrame = frame; 
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
