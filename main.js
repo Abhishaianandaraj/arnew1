@@ -42,11 +42,6 @@ async function init() {
   mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
   mesh.visible = false;
   scene.add(mesh);
-
-  mesh1 = new THREE.Mesh(geometry, material);
-  mesh1.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
-  mesh1.visible = false;
-  scene.add(mesh1);
   
   // setup the image target
   const img = document.getElementById('imgMarkerHiro');
