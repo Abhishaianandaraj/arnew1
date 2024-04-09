@@ -13,10 +13,7 @@ async function init() {
 
   scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(50,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    40
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20
   );
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
