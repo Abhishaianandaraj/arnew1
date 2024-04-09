@@ -2,7 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-let camera, canvas, scene, renderer;
+let camera, scene, renderer;
 let mesh;
 
 init();
@@ -54,13 +54,14 @@ async function init() {
   });
   document.body.appendChild(button);
 
-  button.addEventListener('click', addButton); // Add event listener to ARButton
+  button.addEventListener('click', () => {
+    addButton();
+  });
 
   window.addEventListener("resize", onWindowResize, false);
 }
 
 function addButton() {
-  // Create a new button
   const newButton = document.createElement('button');
   newButton.textContent = 'New Button';
   newButton.style.position = 'absolute';
@@ -68,13 +69,9 @@ function addButton() {
   newButton.style.left = '20px';
   document.body.appendChild(newButton);
 
-  // Add event listener to newly added button
-  newButton.addEventListener('click', logPositions);
-}
-
-function logPositions() {
-  console.log("Image position:", mesh.position);
-  console.log("Camera position:", camera.position);
+  newButton.addEventListener('click', () => {
+    logPose();
+  });
 }
 
 function onWindowResize() {
@@ -96,7 +93,6 @@ function render(timestamp, frame) {
   if (frame) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
-    const viewerPose = frame.getViewerPose(referenceSpace);
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
@@ -109,4 +105,11 @@ function render(timestamp, frame) {
     }
   }
   renderer.render(scene, camera);
+}
+
+function logPose() {
+  const referenceSpace = renderer.xr.getReferenceSpace();
+  const pose = frame.getPose(result.imageSpace, referenceSpace);
+  console.log('Image Pose:', pose);
+  console.log('Camera Pose:', camera.matrixWorld.elements);
 }
