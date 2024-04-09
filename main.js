@@ -101,7 +101,8 @@ function render( timestamp, frame ) {
       const referenceSpace = renderer.xr.getReferenceSpace();
       console.log(referenceSpace);
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
-
+      console.log(pose);
+      console.log(referenceSpace);
 			const state = result.trackingState;
       console.log(state);
 
