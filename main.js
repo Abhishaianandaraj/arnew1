@@ -2,9 +2,8 @@ import './style.css';
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-let camera, scene, renderer;
+let camera, canvas, scene, renderer;
 let mesh;
-let lastFrame;
 
 init();
 animate();
@@ -55,26 +54,8 @@ async function init() {
   });
   document.body.appendChild(button);
 
-  button.addEventListener('click', () => {
-    addButton(lastFrame); // Pass the lastFrame to addButton
-  });
-
   window.addEventListener("resize", onWindowResize, false);
 }
-
-function addButton(frame) {
-  const newButton = document.createElement('button');
-  newButton.textContent = 'New Button';
-  newButton.style.position = 'absolute';
-  newButton.style.top = '20px';
-  newButton.style.left = '20px';
-  document.body.appendChild(newButton);
-
-  newButton.addEventListener('click', () => {
-    logPose(frame);
-  });
-}
-
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -93,29 +74,24 @@ function animate() {
 
 function render(timestamp, frame) {
   if (frame) {
-    lastFrame = frame; 
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
+    const viewerPose = frame.getViewerPose(referenceSpace);
+    console.log(viewerPose);
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
+      console.log(pose);
       const state = result.trackingState;
+      console.log(state);
       if (state == "tracked") {
+        console.log("Image target has been found");
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
       } else if (state == "emulated") {
         mesh.visible = false;
+        console.log("Image target no longer seen");
       }
     }
   }
   renderer.render(scene, camera);
-}
-
-function logPose(frame) {
-  const referenceSpace = renderer.xr.getReferenceSpace();
-  const results = frame.getImageTrackingResults();
-  for (const result of results) {
-    const pose = frame.getPose(result.imageSpace, referenceSpace);
-    console.log('Image Pose:', pose);
-  }
-  console.log('Camera Pose:', camera.matrixWorld.elements);
 }
