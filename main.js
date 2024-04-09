@@ -87,7 +87,7 @@ function animate() {
 }
 
 function render( timestamp, frame ) {
-
+  console.log(viewerPose);
 	if ( frame ) {
 
 		const results = frame.getImageTrackingResults();
@@ -111,7 +111,7 @@ function render( timestamp, frame ) {
         console.log("Image target has been found")
         mesh.visible = true;
         // update the cone mesh when the image target is found
-        console.log(viewerPose)
+        
         mesh.matrix.fromArray(pose.transform.matrix);
        // console.log(mesh.position);
       } else if (state == "emulated") {
