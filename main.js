@@ -103,16 +103,17 @@ function render( timestamp, frame ) {
 			const pose = frame.getPose( result.imageSpace, referenceSpace );
 
 			const state = result.trackingState;
+      console.log(state);
 
-			if ( state == "tracked" ) {
-			
-				HighlightImage( imageIndex, pose );
-				
-			} else if ( state == "emulated" ) {
-			
-				FadeImage( imageIndex, pose );
-				
-			}
+      if (state == "tracked") {
+        console.log("Image target has been found")
+        mesh.visible = true;
+        // update the cone mesh when the image target is found
+        mesh.matrix.fromArray(pose.transform.matrix);
+      } else if (state == "emulated") {
+        mesh.visible = false;
+        console.log("Image target no longer seen")
+      }
 			
 		}
 
