@@ -62,7 +62,9 @@ async function init() {
 function logandfix(Markerpose) {
   mesh.matrix.copy(Markerpose); // Use copy instead of fromArray
   mesh.visible = true;
+  MarkerPose = Markerpose;
   console.log(Markerpose);
+
 }
 
 function onWindowResize() {
@@ -88,10 +90,9 @@ function render(timestamp, frame) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
       if (state == "tracked" && !trackingStopped) {
-        console.log("Image target has been found"); 
-        MarkerPose = pose; 
-        logandfix(MarkerPose.transform.matrix);
-        console.log(MarkerPose); 
+        console.log("Image target has been found");  
+        logandfix(pose.transform.matrix);
+        console.log(pose); 
         trackingStopped = true;
          // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
