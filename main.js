@@ -78,13 +78,9 @@ function render(timestamp, frame) {
   if (frame) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
-    const viewerPose = frame.getViewerPose(referenceSpace);
-    console.log(viewerPose);
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
-      console.log(pose);
       const state = result.trackingState;
-      console.log(state);
       if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found");
         mesh.visible = true;
