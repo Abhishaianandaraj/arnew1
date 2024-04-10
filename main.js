@@ -90,7 +90,7 @@ function render(timestamp, frame) {
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
         trackingStopped = true;
-        log(pose.transform.matrix); // Set tracking stopped flag to true
+        log(pose); // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
       } else if (state == "emulated") {
         mesh.visible = false;
