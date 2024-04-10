@@ -5,6 +5,8 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 let camera, canvas, scene, renderer;
 let mesh;
 
+let trackingStopped = false; // Flag to track if image tracking has stopped
+
 init();
 animate();
 
@@ -65,10 +67,10 @@ function onWindowResize() {
 }
 
 function animate() {
-  if(renderer) {
+  if(renderer && !trackingStopped) { // Check if tracking is not stopped
     renderer.setAnimationLoop(render);
   } else {
-    console.log("no renderer");
+    console.log("no renderer or tracking stopped");
   }
 }
 
@@ -87,6 +89,8 @@ function render(timestamp, frame) {
         console.log("Image target has been found");
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
+        console.log(pose.transform.position);
+        trackingStopped = true; // Set tracking stopped flag to true
       } else if (state == "emulated") {
         mesh.visible = false;
         console.log("Image target no longer seen");
