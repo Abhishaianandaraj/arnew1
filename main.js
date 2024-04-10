@@ -95,6 +95,7 @@ function render(timestamp, frame) {
         // return; // Exit the loop early since we've found the image
       } else if (trackingStopped) { 
         log(MarkerPose);
+
       } 
       else if (state == "emulated") {
         mesh.visible = false;
@@ -102,8 +103,11 @@ function render(timestamp, frame) {
       }
     }
   }
+
+  renderer.render(scene, camera);
+
   if (!trackingStopped) {
-    renderer.render(scene, camera);
+    // renderer.render(scene, camera);
   }else{
     console.log("Image Tracking stopped");
   }
