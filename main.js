@@ -62,6 +62,7 @@ async function init() {
 function log(position) {
   mesh.visible = true;
   mesh.matrix.fromArray(position.transform.matrix);
+  console.log("IMAGE",position.transform.matrix);
   console.log(mesh.matrix);
 }
 
