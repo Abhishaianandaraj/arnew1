@@ -77,7 +77,7 @@ function logandfix(Markerpose) {
     MarkerPose = Markerpose;
     console.log("Mesh position set:", translation);
   } else {
-    console.error("Markerpose is invalid or undefined.");
+    console.error("Markerpose is invalid or undefined:", Markerpose);
   }
 }
 
