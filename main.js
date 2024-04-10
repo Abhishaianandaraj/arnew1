@@ -60,7 +60,7 @@ async function init() {
 }
 
 function logandfix(Markerpose) {
-  mesh.matrix.fromArray(Markerpose);
+  mesh.matrix.copy(Markerpose); // Use copy instead of fromArray
   mesh.visible = true;
   console.log(Markerpose);
 }
