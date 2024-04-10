@@ -67,10 +67,10 @@ function onWindowResize() {
 }
 
 function animate() {
-  if(renderer && !trackingStopped) { // Check if tracking is not stopped
+  if(renderer) {
     renderer.setAnimationLoop(render);
   } else {
-    console.log("no renderer or tracking stopped");
+    console.log("no renderer");
   }
 }
 
@@ -85,17 +85,19 @@ function render(timestamp, frame) {
       console.log(pose);
       const state = result.trackingState;
       console.log(state);
-      if (state == "tracked") {
+      if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found");
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(pose.transform.position);
         trackingStopped = true; // Set tracking stopped flag to true
+        return; // Exit the loop early since we've found the image
       } else if (state == "emulated") {
         mesh.visible = false;
         console.log("Image target no longer seen");
       }
     }
   }
-  renderer.render(scene, camera);
+  if (!trackingStopped) {
+    renderer.render(scene, camera);
+  }
 }
