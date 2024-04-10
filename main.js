@@ -91,9 +91,10 @@ function render(timestamp, frame) {
       if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found");
         // trackingStopped = true;
+        MarkerPose = pose; 
         log(MarkerPose);
 
-        MarkerPose = pose; // Set tracking stopped flag to true
+        // Set tracking stopped flag to true
         // return; // Exit the loop early since we've found the image
       } else if (trackingStopped) { 
 
