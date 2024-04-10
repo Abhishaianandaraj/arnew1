@@ -60,7 +60,9 @@ async function init() {
 }
 
 function log(position) {
-console.log(position);
+  mesh.visible = true;
+  mesh.matrix.fromArray(position.transform.matrix);
+  console.log(position);
 }
 
 function onWindowResize() {
@@ -87,8 +89,6 @@ function render(timestamp, frame) {
       const state = result.trackingState;
       if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found");
-        mesh.visible = true;
-        mesh.matrix.fromArray(pose.transform.matrix);
         trackingStopped = true;
         log(pose); // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
