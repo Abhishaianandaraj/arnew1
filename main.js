@@ -59,33 +59,9 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
-function logandfix(Markerpose) {
-  if (Markerpose && Markerpose.length === 16) {
-    // Construct a Matrix4 object from the Float32Array
-    const matrix = new THREE.Matrix4();
-    matrix.fromArray(Markerpose);
-
-    // Extract translation components
-    const translation = new THREE.Vector3();
-    translation.setFromMatrixPosition(matrix);
-
-    // Set position of the mesh
-    mesh.position.copy(translation);
-
-    // Optionally, you can also extract rotation and scale components if needed
-    // const rotation = new THREE.Quaternion();
-    // const scale = new THREE.Vector3();
-    // matrix.decompose(translation, rotation, scale);
-
-    mesh.visible = true;
-    MarkerPose = matrix;
-    console.log("Mesh position set:", translation);
-  } else {
-    console.error("Markerpose is invalid or undefined:", Markerpose);
-  }
+function log(position) {
+console.log(position);
 }
-
-
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -110,11 +86,11 @@ function render(timestamp, frame) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
       if (state == "tracked" && !trackingStopped) {
-        console.log("Image target has been found");  
-        console.log(pose.transform.matrix);
-        logandfix(pose.transform.matrix); 
+        console.log("Image target has been found");
+        mesh.visible = true;
+        mesh.matrix.fromArray(pose.transform.matrix);
         trackingStopped = true;
-         // Set tracking stopped flag to true
+        log(pose.transform.matrix); // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
       } else if (state == "emulated") {
         mesh.visible = false;
@@ -124,5 +100,7 @@ function render(timestamp, frame) {
   }
   if (!trackingStopped) {
     renderer.render(scene, camera);
+  }else{
+    console.log("Image Tracking stopped");
   }
 }
