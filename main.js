@@ -90,11 +90,12 @@ function render(timestamp, frame) {
       const state = result.trackingState;
       if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found");
-        trackingStopped = true;
+        // trackingStopped = true;
+        log(MarkerPose);
+
         MarkerPose = pose; // Set tracking stopped flag to true
         // return; // Exit the loop early since we've found the image
       } else if (trackingStopped) { 
-        log(MarkerPose);
 
       } 
       else if (state == "emulated") {
