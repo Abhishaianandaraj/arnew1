@@ -95,5 +95,7 @@ function render(timestamp, frame) {
   }
   if (!trackingStopped) {
     renderer.render(scene, camera);
+  }else{
+    console.log("Image Tracking stopped");
   }
 }
