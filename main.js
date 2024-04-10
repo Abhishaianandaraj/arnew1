@@ -2,23 +2,17 @@ import './style.css';
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-
 let camera, canvas, scene, renderer;
 let mesh;
+let MarkerPose;
+let trackingStopped = false; // Flag to track if image tracking has stopped
 
 init();
 animate();
 
 async function init() {
-
   scene = new THREE.Scene();
-
-  camera = new THREE.PerspectiveCamera(50,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    40
-  );
-
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 40);
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -28,11 +22,9 @@ async function init() {
   light.position.set(0.5, 1, 0.25);
   scene.add(light);
 
-  // setup a cone mesh to put on top of the image target when it is seen
   const radius = 0.2;
   const height = 0.3;
   const geometry = new THREE.ConeGeometry(radius, height, 32);
-  //by default the image will be rendered in the middle, so we need to push half of the height up to be exactly on top of the img
   geometry.translate(0, height / 2, 0);
 
   const material = new THREE.MeshNormalMaterial({
@@ -42,25 +34,21 @@ async function init() {
   });
 
   mesh = new THREE.Mesh(geometry, material);
-  mesh.matrixAutoUpdate = false; // important we have to set this to false because we'll update the position when we track an image
+  mesh.matrixAutoUpdate = false;
   mesh.visible = false;
   scene.add(mesh);
-  
-  // setup the image target
+
   const img = document.getElementById('imgMarkerHiro');
   const imgBitmap = await createImageBitmap(img);
-  console.log(imgBitmap);
 
-  //more on image-tracking feature: https://github.com/immersive-web/marker-tracking/blob/main/explainer.md
   const button = ARButton.createButton(renderer, {
-    requiredFeatures: ["image-tracking"], // notice a new required feature
+    requiredFeatures: ["image-tracking"],
     trackedImages: [
       {
-        image: imgBitmap, // tell WebXR this is the image target we want to track
-        widthInMeters: 0.7 // in meters what the size of the PRINTED image in the real world
+        image: imgBitmap,
+        widthInMeters: 0.7
       }
     ],
-    //this is for the mobile debug
     optionalFeatures: ["dom-overlay", "dom-overlay-for-handheld-ar"],
     domOverlay: {
       root: document.body
@@ -71,6 +59,13 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
+function log(position) {
+  mesh.visible = true;
+  mesh.matrix.fromArray(position.transform.matrix);
+  console.log(position.transform.matrix)
+  console.log(mesh.matrix);
+}
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -79,49 +74,37 @@ function onWindowResize() {
 }
 
 function animate() {
-  if(renderer){
-  renderer.setAnimationLoop(render);}
-  else{
+  if(renderer) {
+    renderer.setAnimationLoop(render);
+  } else {
     console.log("no renderer");
   }
 }
 
-function render( timestamp, frame ) {
-
-	if ( frame ) {
-
-		const results = frame.getImageTrackingResults();
-		
-		for ( const result of results ) {
-		
-			// The result's index is the image's position in the trackedImages array specified at session creation
-			const imageIndex = result.index;
-      console.log(result);
-			// Get the pose of the image relative to a reference space.
-      const referenceSpace = renderer.xr.getReferenceSpace();
-      console.log(referenceSpace);
-			const pose = frame.getPose( result.imageSpace, referenceSpace );
-
-			const state = result.trackingState;
-      console.log(state);
-
-      if (state == "tracked") {
-        console.log("Image target has been found")
-        mesh.visible = true;
-        // update the cone mesh when the image target is found
-        mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(pose);
-      } else if (state == "emulated") {
+function render(timestamp, frame) {
+  if (frame) {
+    const results = frame.getImageTrackingResults();
+    const referenceSpace = renderer.xr.getReferenceSpace();
+    for (const result of results) {
+      const pose = frame.getPose(result.imageSpace, referenceSpace);
+      const state = result.trackingState;
+      if (state == "tracked" && !trackingStopped) {
+        console.log("Image target has been found");
+        trackingStopped = true;
+        MarkerPose = pose; // Set tracking stopped flag to true
+        return; // Exit the loop early since we've found the image
+      } else if (trackingStopped) { 
+          log(MarkerPose);
+      } 
+      else if (state == "emulated") {
         mesh.visible = false;
-        console.log("Image target no longer seen")
+        console.log("Image target no longer seen");
       }
-			
-		}
-
-	}
-
-	renderer.render( scene, camera );
-
+    }
+  }
+  if (!trackingStopped) {
+    renderer.render(scene, camera);
+  }else{
+    console.log("Image Tracking stopped");
+  }
 }
-
-  
