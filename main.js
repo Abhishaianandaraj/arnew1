@@ -61,9 +61,20 @@ async function init() {
 
 function log(position) {
   mesh.visible = true;
-  mesh.matrix.fromArray(position.transform.matrix);
-  console.log("IMAGE",position.transform.matrix);
-  console.log(mesh.matrix);
+  
+  // Create a matrix from the Float32Array
+  const matrix = new THREE.Matrix4();
+  matrix.fromArray(position.transform.matrix);
+
+  // Apply the matrix to the mesh's position
+  mesh.position.setFromMatrixPosition(matrix);
+  
+  // Optionally, set the mesh's rotation and scale as well if needed
+  // mesh.quaternion.setFromRotationMatrix(matrix);
+  // mesh.scale.setFromMatrixScale(matrix);
+
+  console.log("IMAGE", position.transform.matrix);
+  console.log("Mesh matrix:", mesh.matrix);
 }
 
 function onWindowResize() {
