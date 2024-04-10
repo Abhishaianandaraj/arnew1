@@ -59,6 +59,10 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
+function log(position) {
+console.log(position);
+}
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -85,7 +89,8 @@ function render(timestamp, frame) {
         console.log("Image target has been found");
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
-        trackingStopped = true; // Set tracking stopped flag to true
+        trackingStopped = true;
+        log(pose.transform.position); // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
       } else if (state == "emulated") {
         mesh.visible = false;
