@@ -90,9 +90,10 @@ function render(timestamp, frame) {
       if (state == "tracked" && !trackingStopped) {
         console.log("Image target has been found"); 
         MarkerPose = pose; 
+        logandfix(MarkerPose.transform.matrix);
         console.log(MarkerPose); 
         trackingStopped = true;
-        logandfix(MarkerPose.transform.matrix); // Set tracking stopped flag to true
+         // Set tracking stopped flag to true
         return; // Exit the loop early since we've found the image
       } else if (state == "emulated") {
         mesh.visible = false;
