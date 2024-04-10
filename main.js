@@ -60,12 +60,27 @@ async function init() {
 }
 
 function logandfix(Markerpose) {
-  /*mesh.matrix.copy(Markerpose); // Use copy instead of fromArray
-  mesh.visible = true;*/
-  MarkerPose = Markerpose;
-  console.log(MarkerPose);
+  if (Markerpose && Markerpose.elements) {
+    // Extract translation components
+    const translation = new THREE.Vector3();
+    translation.setFromMatrixPosition(Markerpose);
 
+    // Set position of the mesh
+    mesh.position.copy(translation);
+    
+    // Optionally, you can also extract rotation and scale components if needed
+    // const rotation = new THREE.Quaternion();
+    // const scale = new THREE.Vector3();
+    // Markerpose.decompose(translation, rotation, scale);
+
+    mesh.visible = true;
+    MarkerPose = Markerpose;
+    console.log("Mesh position set:", translation);
+  } else {
+    console.error("Markerpose is invalid or undefined.");
+  }
 }
+
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
