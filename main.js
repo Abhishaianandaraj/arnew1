@@ -92,7 +92,8 @@ function render(timestamp, frame) {
       const state = result.trackingState;
       if (state === "tracked" && !trackingStopped) {
         console.log("Image target has been found");
-        trackingStopped = true; // Stop further tracking
+        trackingStopped = true;
+        console.log(pose); // Stop further tracking
         trackedPose = pose; // Store the tracked pose
         console.log("Tracking stopped");
         break; // Exit the loop once tracking is stopped
@@ -103,7 +104,7 @@ function render(timestamp, frame) {
     }
   }
 
-  if (trackingStopped) {
+  if (trackingStopped && trackedPose) {
     mesh.visible = true;
     mesh.matrix.fromArray(trackedPose.transform.matrix);
     console.log(mesh.transform.matrix);
