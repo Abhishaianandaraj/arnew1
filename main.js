@@ -83,7 +83,7 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame && !trackingStopped) {
+  if (frame && trackingStopped) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
