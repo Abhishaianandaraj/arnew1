@@ -90,7 +90,7 @@ function render(timestamp, frame) {
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state === "tracked") {
+      if (state === "tracked" && !trackingStopped) {
         console.log("Image target has been found");
         trackingStopped = true; // Stop further tracking
         trackedPose = pose; // Store the tracked pose
@@ -98,6 +98,7 @@ function render(timestamp, frame) {
         break; // Exit the loop once tracking is stopped
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
+        console.log(trackedPose);
       }
     }
   }
