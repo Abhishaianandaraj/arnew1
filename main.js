@@ -5,7 +5,8 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 let camera, canvas, scene, renderer;
 let mesh;
 let MarkerPose;
-let trackingStopped = false; // Flag to track if image tracking has stopped
+let trackingStopped = false;
+let stopTracking =false; // Flag to track if image tracking has stopped
 
 init();
 animate();
@@ -65,6 +66,7 @@ function log(position) {
   console.log(position.transform.matrix)
   //console.log(mesh.matrix);
   renderer.render(scene, camera);
+  stopTracking = true;
 }
 
 function onWindowResize() {
@@ -83,7 +85,7 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame && trackingStopped) {
+  if (frame && !stopTracking) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
