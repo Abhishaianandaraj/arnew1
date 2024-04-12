@@ -61,8 +61,9 @@ async function init() {
 
 function log(position) {
   mesh.visible = true;
-  mesh.matrix.fromArray(position.transform.matrix); // Set the mesh's matrix directly from the pose's transform matrix
-  mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale); // Decompose the matrix to update position, rotation, and scale
+  mesh.position.copy(position.transform.position);
+  mesh.quaternion.copy(position.transform.orientation);
+  console.log(mesh);
   renderer.render(scene, camera);
 }
 
@@ -82,7 +83,7 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame && !trackingStopped) {
+  if (frame) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
