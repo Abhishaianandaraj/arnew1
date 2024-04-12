@@ -82,13 +82,13 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame) {
+  if (frame && !trackingStopped) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state == "tracked" && !trackingStopped) {
+      if (state == "tracked" ) {
         console.log("Image target has been found");
         trackingStopped = true;
         MarkerPose = pose; 
@@ -108,6 +108,6 @@ function render(timestamp, frame) {
    //h
   }else{
     log(MarkerPose);
-   console.log("tracking stopped");
+    console.log("tracking stopped");
   }
 }
