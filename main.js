@@ -105,6 +105,7 @@ function render(timestamp, frame) {
   }
 
   if (trackingStopped && trackedPose) {
+    console.log(trackedPose);
     mesh.visible = true;
     mesh.matrix.fromArray(trackedPose.transform.matrix);
     console.log(mesh.transform.matrix);
