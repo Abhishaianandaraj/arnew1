@@ -63,7 +63,7 @@ function log(position) {
   mesh.visible = true;
   mesh.matrix.fromArray(position.transform.matrix);
   console.log(position.transform.matrix)
-  console.log(mesh.matrix);
+  //console.log(mesh.matrix);
   renderer.render(scene, camera);
 }
 
@@ -101,6 +101,8 @@ function render(timestamp, frame) {
         console.log("Image target no longer seen");
       }
     }
+  }else{
+    console.log("wrong method");
   }
 
   
