@@ -2,7 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
-let camera, canvas, scene, renderer;
+let camera, scene, renderer;
 let mesh;
 let trackedPose;
 let trackingStopped = false;
@@ -61,9 +61,8 @@ async function init() {
 
 function log(position) {
   mesh.visible = true;
-  mesh.position.copy(position.transform.position);
-  mesh.quaternion.copy(position.transform.orientation);
-  console.log(mesh);
+  mesh.matrix.fromArray(position.transform.matrix); // Set the mesh's matrix directly from the pose's transform matrix
+  mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale); // Decompose the matrix to update position, rotation, and scale
   renderer.render(scene, camera);
 }
 
