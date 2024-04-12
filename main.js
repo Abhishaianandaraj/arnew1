@@ -6,7 +6,6 @@ let camera, canvas, scene, renderer;
 let mesh;
 let trackedPose;
 let trackingStopped = false;
-let stopTracking =false; // Flag to track if image tracking has stopped
 
 init();
 animate();
@@ -62,10 +61,9 @@ async function init() {
 
 function log(position) {
   mesh.visible = true;
-  mesh.matrix.fromArray(position.transform.matrix);
-  console.log(position.transform.matrix)
-  //console.log(mesh.matrix);
-  stopTracking = true;
+  mesh.position.copy(position.transform.position);
+  mesh.quaternion.copy(position.transform.orientation);
+  renderer.render(scene, camera);
 }
 
 function onWindowResize() {
@@ -91,23 +89,16 @@ function render(timestamp, frame) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
       if (state === "tracked" && !trackingStopped) {
-        console.log("Image target has been found");
         trackingStopped = true;
-        console.log(pose); // Stop further tracking
-        trackedPose = pose; // Store the tracked pose
-        console.log("Tracking stopped");
-        break; // Exit the loop once tracking is stopped
+        trackedPose = pose;
+        break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
-        console.log(trackedPose);
       }
     }
   }
 
   if (trackingStopped && trackedPose) {
-    mesh.visible = true;
-    mesh.position.copy(trackedPose.transform.position); // Set the position of the mesh
-    mesh.quaternion.copy(trackedPose.transform.orientation); // Set the orientation of the mesh
-    renderer.render(scene, camera);
+    log(trackedPose);
   }
 }
