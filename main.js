@@ -63,6 +63,7 @@ function log(position) {
   mesh.visible = true;
   mesh.position.copy(position.transform.position);
   mesh.quaternion.copy(position.transform.orientation);
+  console.log(mesh);
   renderer.render(scene, camera);
 }
 
