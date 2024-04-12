@@ -105,11 +105,9 @@ function render(timestamp, frame) {
   }
 
   if (trackingStopped && trackedPose) {
-    console.log(trackedPose.transform.matrix);
     mesh.visible = true;
     mesh.position.copy(trackedPose.transform.position); // Set the position of the mesh
     mesh.quaternion.copy(trackedPose.transform.orientation); // Set the orientation of the mesh
-    console.log(mesh.position);
     renderer.render(scene, camera);
   }
 }
