@@ -64,6 +64,7 @@ function log(position) {
   mesh.matrix.fromArray(position.transform.matrix);
   console.log(position.transform.matrix)
   console.log(mesh.matrix);
+  renderer.render(scene, camera);
 }
 
 function onWindowResize() {
@@ -102,10 +103,10 @@ function render(timestamp, frame) {
     }
   }
 
-  renderer.render(scene, camera);
+  
 
   if (!trackingStopped) {
-   //h
+    renderer.render(scene, camera);
   }else{
     log(MarkerPose);
     console.log("tracking stopped");
