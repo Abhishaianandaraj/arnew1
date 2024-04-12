@@ -4,7 +4,7 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
 let camera, canvas, scene, renderer;
 let mesh;
-let MarkerPose;
+let trackedPose;
 let trackingStopped = false;
 let stopTracking =false; // Flag to track if image tracking has stopped
 
@@ -65,7 +65,6 @@ function log(position) {
   mesh.matrix.fromArray(position.transform.matrix);
   console.log(position.transform.matrix)
   //console.log(mesh.matrix);
-  renderer.render(scene, camera);
   stopTracking = true;
 }
 
@@ -85,34 +84,28 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame && !stopTracking) {
+  if (frame && !trackingStopped) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state == "tracked" ) {
+      if (state === "tracked") {
         console.log("Image target has been found");
-        trackingStopped = true;
-        MarkerPose = pose; 
-      } else if (trackingStopped) { 
-
-      } 
-      else if (state == "emulated") {
-        mesh.visible = false;
+        trackingStopped = true; // Stop further tracking
+        trackedPose = pose; // Store the tracked pose
+        console.log("Tracking stopped");
+        break; // Exit the loop once tracking is stopped
+      } else if (state === "emulated") {
         console.log("Image target no longer seen");
       }
     }
-  }else{
-    console.log("wrong method");
   }
 
-  
-
-  if (!trackingStopped) {
+  if (trackingStopped) {
+    mesh.visible = true;
+    mesh.matrix.fromArray(trackedPose.transform.matrix);
+    console.log(mesh.transform.matrix);
     renderer.render(scene, camera);
-  }else{
-    log(MarkerPose);
-    console.log("tracking stopped");
   }
 }
