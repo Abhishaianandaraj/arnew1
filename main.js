@@ -34,7 +34,7 @@ async function init() {
   });
 
   mesh = new THREE.Mesh(geometry, material);
-  mesh.matrixAutoUpdate = false;
+  mesh.matrixAutoUpdate = true;
   mesh.visible = false;
   scene.add(mesh);
   
@@ -44,11 +44,7 @@ const secondMaterial = new THREE.MeshNormalMaterial();
 
 // Create the second mesh
 const secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
-
-// Set the position of the second mesh to a random fixed position
-secondMesh.position.set(1, 1, -1); // Adjust the position as needed
-
-// Add the second mesh to the scene
+secondMesh.position.set(1,1,-1);
 scene.add(secondMesh);
 
 
