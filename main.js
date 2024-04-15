@@ -60,26 +60,26 @@ async function init() {
 }
 
 function log(position, frame) {
-  // Make the mesh visible
   mesh.visible = true;
 
-  // Set the position and rotation of the mesh based on the matrix
-  mesh.matrix.fromArray(position.transform.matrix);
-  mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale);
+  // Copy position and orientation from the tracked pose
+  const positionVector = new THREE.Vector3().copy(position.transform.position);
+  const orientationQuaternion = new THREE.Quaternion().copy(position.transform.orientation);
+   console.log(positionVector + " " + orientationQuaternion);
+  // Apply a forward translation of 1 meter to the position
+  const forwardDirection = new THREE.Vector3(0, 0, -1); // Assuming forward direction is along negative z-axis
+  forwardDirection.applyQuaternion(orientationQuaternion); // Apply orientation
+  forwardDirection.multiplyScalar(1); // 1 meter forward translation
+  positionVector.add(forwardDirection); // Add translated direction to position
 
-  // Get the viewer pose from the frame
-  const referenceSpace = renderer.xr.getReferenceSpace();
-  const viewerPose = frame.getViewerPose(referenceSpace);
-
-  // Log the viewer pose and mesh for debugging
-  console.log(position.transform.position);
-  console.log(mesh.position);
-
-  // Render the scene
+  // Set mesh position and orientation
+  mesh.position.copy(positionVector);
+  mesh.quaternion.copy(orientationQuaternion);
+  console.log(mesh);  // Render the scene
   renderer.render(scene, camera);
 }
 
-//hio
+//
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -96,13 +96,13 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame && !trackingStopped) {
+  if (frame) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state === "tracked") {
+      if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
         trackedPose = pose;
         break;
