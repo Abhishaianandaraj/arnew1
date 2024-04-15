@@ -65,7 +65,7 @@ function log(position, frame) {
   // Copy position and orientation from the tracked pose
   const positionVector = new THREE.Vector3().copy(position.transform.position);
   const orientationQuaternion = new THREE.Quaternion().copy(position.transform.orientation);
-   console.log(positionVector + " " + orientationQuaternion);
+   console.log(positionVector);
   // Apply a forward translation of 1 meter to the position
   const forwardDirection = new THREE.Vector3(0, 0, -1); // Assuming forward direction is along negative z-axis
   forwardDirection.applyQuaternion(orientationQuaternion); // Apply orientation
