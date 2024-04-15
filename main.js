@@ -59,27 +59,17 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
-function log(position, frame) {
+function log(position,frame) {
   mesh.visible = true;
-
-  // Copy position and orientation from the tracked pose
-  const positionVector = new THREE.Vector3().copy(position.transform.position);
-  const orientationQuaternion = new THREE.Quaternion().copy(position.transform.orientation);
-   console.log(positionVector);
-  // Apply a forward translation of 1 meter to the position
-  const forwardDirection = new THREE.Vector3(1, 2, -1); // Assuming forward direction is along negative z-axis
-  forwardDirection.applyQuaternion(orientationQuaternion); // Apply orientation
-  forwardDirection.multiplyScalar(5); // 1 meter forward translation
-  positionVector.add(forwardDirection); // Add translated direction to position
-
-  // Set mesh position and orientation
-  mesh.position.copy(positionVector);
-  mesh.quaternion.copy(orientationQuaternion);
-  console.log(mesh);  // Render the scene
+  mesh.position.copy(position.transform.position);
+  mesh.quaternion.copy(position.transform.orientation);
+  const referenceSpace = renderer.xr.getReferenceSpace(); 
+  const ViewerPose = frame.getViewerPose(referenceSpace);
+  console.log(ViewerPose);
+  console.log(mesh);
   renderer.render(scene, camera);
 }
 
-//
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -105,9 +95,6 @@ function render(timestamp, frame) {
       if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
         trackedPose = pose;
-        console.log(trackedPose);
-        
-        console.log(frame.getViewerPose(referenceSpace));
         break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
