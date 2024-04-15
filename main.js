@@ -6,6 +6,7 @@ let camera, scene, renderer;
 let mesh;
 let trackedPose;
 let trackingStopped = false;
+let ViewerPose;
 
 init();
 animate();
@@ -107,7 +108,7 @@ function render(timestamp, frame) {
         trackingStopped = true;
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
-        const ViewerPose = frame.getViewerPose(referenceSpace);
+        ViewerPose = frame.getViewerPose(referenceSpace);
         break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
@@ -115,7 +116,7 @@ function render(timestamp, frame) {
     }
   }
 
-  if (trackingStopped && trackedPose) {
+  if (trackingStopped && trackedPose && ViewerPose) {
     log(trackedPose , ViewerPose);
   }
 }
