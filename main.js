@@ -117,6 +117,7 @@ function render(timestamp, frame) {
   }
 
   if (trackingStopped && trackedPose && ViewerPose) {
+    console.log("check",ViewerPose);
     log(trackedPose , ViewerPose);
   }
 }
