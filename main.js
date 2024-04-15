@@ -113,7 +113,7 @@ function render(timestamp, frame) {
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
-        break;
+        //break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
       }
