@@ -62,9 +62,8 @@ async function init() {
 function log(position,frame) {
   mesh.visible = true;
   mesh.position.copy(position.transform.position);
-  mesh.quaternion.copy(position.transform.orientation);
-  const referenceSpace = renderer.xr.getReferenceSpace(); 
-  const ViewerPose = frame.getViewerPose(referenceSpace);
+  mesh.quaternion.copy(position.transform.orientation); 
+  const ViewerPose = frame.getViewerPose();
   console.log(ViewerPose);
   console.log(mesh);
   renderer.render(scene, camera);
