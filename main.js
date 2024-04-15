@@ -107,7 +107,6 @@ function render(timestamp, frame) {
       if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
         trackedPose = pose;
-        const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
         console.log(ViewerPose);
         break;
