@@ -109,7 +109,7 @@ function render(timestamp, frame) {
         trackingStopped = true;
         mesh.visible = true;
         mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(pose.tranform.matrix);
+        console.log(pose.transform.matrix);
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
