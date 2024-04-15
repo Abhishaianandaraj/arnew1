@@ -59,16 +59,26 @@ async function init() {
   window.addEventListener("resize", onWindowResize, false);
 }
 
-function log(position,frame) {
+function log(position, frame) {
+  // Make the mesh visible
   mesh.visible = true;
-  mesh.position.copy(position.transform.position);
-  mesh.quaternion.copy(position.transform.orientation);
-  const referenceSpace = renderer.xr.getReferenceSpace(); 
-  const ViewerPose = frame.getViewerPose(referenceSpace);
-  console.log(ViewerPose);
+
+  // Set the position and rotation of the mesh based on the matrix
+  mesh.matrix.fromArray(position.transform.matrix);
+  mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale);
+
+  // Get the viewer pose from the frame
+  const referenceSpace = renderer.xr.getReferenceSpace();
+  const viewerPose = frame.getViewerPose(referenceSpace);
+
+  // Log the viewer pose and mesh for debugging
+  console.log(viewerPose);
   console.log(mesh);
+
+  // Render the scene
   renderer.render(scene, camera);
 }
+
 //hio
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
