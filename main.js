@@ -75,12 +75,12 @@ function log(position,Vposition) {
   mesh.visible = true;
   mesh.position.copy(position.transform.position);
   mesh.quaternion.copy(position.transform.orientation);
-  mesh.position.copy(Vposition.transform.position);
-  mesh.quaternion.copy(Vposition.transform.orientation);
- 
-  console.log(mesh);
+  secondMesh.visible =true;
+  secondMesh.position.copy(Vposition.transform.position);
+  secondMesh.quaternion.copy(Vposition.transform.orientation);
   renderer.render(scene, camera);
 }
+
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
