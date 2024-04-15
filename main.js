@@ -105,6 +105,7 @@ function render(timestamp, frame) {
       if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
         trackedPose = pose;
+        console.log(trackedPose);
         break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
