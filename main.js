@@ -67,7 +67,7 @@ function log(position, frame) {
   const orientationQuaternion = new THREE.Quaternion().copy(position.transform.orientation);
    console.log(positionVector);
   // Apply a forward translation of 1 meter to the position
-  const forwardDirection = new THREE.Vector3(0, 0, -1); // Assuming forward direction is along negative z-axis
+  const forwardDirection = new THREE.Vector3(1, 2, -1); // Assuming forward direction is along negative z-axis
   forwardDirection.applyQuaternion(orientationQuaternion); // Apply orientation
   forwardDirection.multiplyScalar(5); // 1 meter forward translation
   positionVector.add(forwardDirection); // Add translated direction to position
