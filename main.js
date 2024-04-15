@@ -69,7 +69,7 @@ function log(position,frame) {
   console.log(mesh);
   renderer.render(scene, camera);
 }
-
+//hio
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
