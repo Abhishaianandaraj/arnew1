@@ -34,18 +34,19 @@ async function init() {
   });
 
   mesh = new THREE.Mesh(geometry, material);
-  mesh.matrixAutoUpdate = true;
+  mesh.matrixAutoUpdate = false;
   mesh.visible = false;
   scene.add(mesh);
   
   // Define the geometry and material for the second mesh
-const secondGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const secondMaterial = new THREE.MeshNormalMaterial();
+  const secondGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+  const secondMaterial = new THREE.MeshNormalMaterial();
 
-// Create the second mesh
-const secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
-secondMesh.position.set(1,1,-1);
-scene.add(secondMesh);
+  // Create the second mesh
+  const secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
+  secondMesh.matrixAutoUpdate = false;
+  secondMesh.visible = false;
+  scene.add(secondMesh);
 
 
   const img = document.getElementById('imgMarkerHiro');
@@ -69,13 +70,13 @@ scene.add(secondMesh);
   window.addEventListener("resize", onWindowResize, false);
 }
 
-function log(position,frame) {
+function log(position,Vposition) {
   mesh.visible = true;
   mesh.position.copy(position.transform.position);
   mesh.quaternion.copy(position.transform.orientation);
-  const referenceSpace = renderer.xr.getReferenceSpace(); 
-  const ViewerPose = frame.getViewerPose(referenceSpace);
-  console.log(ViewerPose);
+  mesh.position.copy(Vposition.transform.position);
+  mesh.quaternion.copy(Vposition.transform.orientation);
+ 
   console.log(mesh);
   renderer.render(scene, camera);
 }
@@ -105,6 +106,8 @@ function render(timestamp, frame) {
       if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
         trackedPose = pose;
+        const referenceSpace = renderer.xr.getReferenceSpace(); 
+        const ViewerPose = frame.getViewerPose(referenceSpace);
         break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
@@ -113,6 +116,6 @@ function render(timestamp, frame) {
   }
 
   if (trackingStopped && trackedPose) {
-    log(trackedPose , frame);
+    log(trackedPose , ViewerPose);
   }
 }
