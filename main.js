@@ -105,8 +105,11 @@ function render(timestamp, frame) {
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state === "tracked" && !trackingStopped) {
+      if (state === "tracked") {
         trackingStopped = true;
+        mesh.visible = true;
+        mesh.position.copy(pose.transform.position);
+        mesh.quaternion.copy(pose.transform.orientation);
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
@@ -117,7 +120,7 @@ function render(timestamp, frame) {
     }
   }
 
-  if (trackingStopped && trackedPose && ViewerPose) {
+  /*if (trackingStopped && trackedPose && ViewerPose) {
     log(trackedPose , ViewerPose);
-  }
+  }*/
 }
