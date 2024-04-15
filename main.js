@@ -108,8 +108,8 @@ function render(timestamp, frame) {
       if (state === "tracked") {
         trackingStopped = true;
         mesh.visible = true;
-        mesh.matrix.fromArray(pose.transform.matrix);
-        
+        mesh.position.copy(pose.transform.position);
+        mesh.quaternion.copy(pose.transform.orientation);
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
@@ -119,7 +119,7 @@ function render(timestamp, frame) {
       }
     }
   }
-
+  renderer.render(scene, camera);
   /*if (trackingStopped && trackedPose && ViewerPose) {
     log(trackedPose , ViewerPose);
   }*/
