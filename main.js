@@ -37,6 +37,20 @@ async function init() {
   mesh.matrixAutoUpdate = false;
   mesh.visible = false;
   scene.add(mesh);
+  
+  // Define the geometry and material for the second mesh
+const secondGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const secondMaterial = new THREE.MeshNormalMaterial();
+
+// Create the second mesh
+const secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
+
+// Set the position of the second mesh to a random fixed position
+secondMesh.position.set(1, 1, -1); // Adjust the position as needed
+
+// Add the second mesh to the scene
+scene.add(secondMesh);
+
 
   const img = document.getElementById('imgMarkerHiro');
   const imgBitmap = await createImageBitmap(img);
