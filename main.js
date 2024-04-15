@@ -4,7 +4,7 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
 let camera, scene, renderer;
 let mesh;
-let secondMesh;
+let secondMesh
 let trackedPose;
 let trackingStopped = false;
 let ViewerPose;
@@ -41,7 +41,7 @@ async function init() {
   scene.add(mesh);
   
   // Define the geometry and material for the second mesh
-  const secondGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+  const secondGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
   const secondMaterial = new THREE.MeshNormalMaterial();
 
   // Create the second mesh
@@ -74,8 +74,7 @@ async function init() {
 
 function log(position,Vposition) {
   mesh.visible = true;
-  mesh.position.copy(position.transform.position);
-  mesh.quaternion.copy(position.transform.orientation);
+  mesh.matrixWorld.fromArray(position.transform.matrix);
   secondMesh.visible =true;
   secondMesh.position.copy(Vposition.transform.position);
   secondMesh.quaternion.copy(Vposition.transform.orientation);
@@ -105,22 +104,19 @@ function render(timestamp, frame) {
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state === "tracked") {
+      if (state === "tracked" && !trackingStopped) {
         trackingStopped = true;
-        mesh.visible = true;
-        mesh.matrix.fromArray(pose.transform.matrix);
-        console.log(pose.transform.matrix);
         trackedPose = pose;
         const referenceSpace = renderer.xr.getReferenceSpace(); 
         ViewerPose = frame.getViewerPose(referenceSpace);
-        //break;
+        break;
       } else if (state === "emulated") {
         console.log("Image target no longer seen");
       }
     }
   }
-  renderer.render(scene, camera);
-  /*if (trackingStopped && trackedPose && ViewerPose) {
+
+  if (trackingStopped && trackedPose && ViewerPose) {
     log(trackedPose , ViewerPose);
-  }*/
+  }
 }
