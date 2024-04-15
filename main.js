@@ -72,8 +72,8 @@ function log(position, frame) {
   const viewerPose = frame.getViewerPose(referenceSpace);
 
   // Log the viewer pose and mesh for debugging
-  console.log(viewerPose);
-  console.log(mesh);
+  console.log(position.transform.position);
+  console.log(mesh.position);
 
   // Render the scene
   renderer.render(scene, camera);
