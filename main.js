@@ -74,7 +74,7 @@ async function init() {
 
 function log(position,Vposition) {
   mesh.visible = true;
-  mesh.matrixWorld.fromArray(position.transform.matrix);
+  mesh.matrix.fromArray(position.transform.matrix);
   secondMesh.visible =true;
   secondMesh.position.copy(Vposition.transform.position);
   secondMesh.quaternion.copy(Vposition.transform.orientation);
