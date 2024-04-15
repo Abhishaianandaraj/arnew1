@@ -96,13 +96,13 @@ function animate() {
 }
 
 function render(timestamp, frame) {
-  if (frame) {
+  if (frame && !trackingStopped) {
     const results = frame.getImageTrackingResults();
     const referenceSpace = renderer.xr.getReferenceSpace();
     for (const result of results) {
       const pose = frame.getPose(result.imageSpace, referenceSpace);
       const state = result.trackingState;
-      if (state === "tracked" && !trackingStopped) {
+      if (state === "tracked") {
         trackingStopped = true;
         trackedPose = pose;
         break;
