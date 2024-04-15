@@ -4,6 +4,7 @@ import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 
 let camera, scene, renderer;
 let mesh;
+let secondMesh;
 let trackedPose;
 let trackingStopped = false;
 let ViewerPose;
@@ -44,7 +45,7 @@ async function init() {
   const secondMaterial = new THREE.MeshNormalMaterial();
 
   // Create the second mesh
-  const secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
+  secondMesh = new THREE.Mesh(secondGeometry, secondMaterial);
   secondMesh.matrixAutoUpdate = false;
   secondMesh.visible = false;
   scene.add(secondMesh);
