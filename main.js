@@ -74,7 +74,8 @@ async function init() {
 
 function log(position,Vposition) {
   mesh.visible = true;
-  mesh.matrix.fromArray(position.transform.matrix);
+  mesh.position.copy(Vposition.transform.position);
+  mesh.quaternion.copy(Vposition.transform.orientation);
   secondMesh.visible =true;
   secondMesh.position.copy(Vposition.transform.position);
   secondMesh.quaternion.copy(Vposition.transform.orientation);
@@ -108,6 +109,7 @@ function render(timestamp, frame) {
         trackingStopped = true;
         trackedPose = pose;
         ViewerPose = frame.getViewerPose(referenceSpace);
+        console.log(frame);
         console.log(ViewerPose);
         break;
       } else if (state === "emulated") {
